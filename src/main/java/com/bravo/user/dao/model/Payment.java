@@ -2,10 +2,9 @@ package com.bravo.user.dao.model;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+
+import com.bravo.user.model.dto.PaymentSaveDto;
 import lombok.Data;
 
 @Entity
@@ -17,7 +16,8 @@ public class Payment {
   @Column(name = "id")
   private String id;
 
-  @Column(name = "user_id", nullable = false)
+  //@JoinColumn(name = "user_id", table = "user", referencedColumnName = "id", nullable = false)
+  @Column(name = "user_id")
   private String userId;
 
   @Column(name = "card_number", nullable = false)
@@ -36,5 +36,12 @@ public class Payment {
     super();
     this.id = UUID.randomUUID().toString();
     this.updated = LocalDateTime.now();
+  }
+
+  public Payment(final PaymentSaveDto payment){
+    this();
+    this.cardNumber = payment.getCardNumber();
+    this.expiryMonth = payment.getExpiryMonth();
+    this.expiryYear = payment.getExpiryYear();
   }
 }

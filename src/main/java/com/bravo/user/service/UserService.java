@@ -29,10 +29,12 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final ResourceMapper resourceMapper;
+  private final PaymentService paymentService;
 
-  public UserService(UserRepository userRepository, ResourceMapper resourceMapper) {
+  public UserService(UserRepository userRepository, ResourceMapper resourceMapper, PaymentService paymentService) {
     this.userRepository = userRepository;
     this.resourceMapper = resourceMapper;
+    this.paymentService = paymentService;
   }
 
   public UserReadDto create(final UserSaveDto request){
@@ -110,11 +112,14 @@ public class UserService {
     final Optional<User> optional = userRepository.findById(id);
     final User user = getUser(id, optional);
 
+    final boolean isPaymentsDeleted = this.paymentService.deleteByUserId(user.getId());
     userRepository.deleteById(user.getId());
 
     final boolean isDeleted = userRepository.findById(id).isEmpty();
-    if(isDeleted){
+    if(isDeleted && isPaymentsDeleted){
       LOGGER.info("deleted user '{}'", id);
+    } else if (!isPaymentsDeleted){
+      LOGGER.warn("failed to delete user '{}' payments ", id);
     } else {
       LOGGER.warn("failed to delete user '{}'", id);
     }
